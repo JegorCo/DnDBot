@@ -2,7 +2,9 @@ import telebot
 import config
 from telebot import types
 bot = telebot.TeleBot(config.TOKEN)
-"""Функция Распределяет модификаторы в зависимости от характериститик"""
+"""
+Функция Распределяет модификаторы в зависимости от характериститик
+"""
 def modificator(skill):
     if skill <= 1:
         return -5
@@ -36,7 +38,9 @@ def modificator(skill):
         return 9
     elif skill == 30:
         return 10
-"""Класс, описывающий характеристики пресонажей"""
+"""
+Класс, описывающий характеристики пресонажей
+"""
 class character:
 
     def __init__(self, name, race, klass, strength, dexterety, constitution, intellegence, wisdom, charisma):
@@ -70,25 +74,31 @@ class character:
         self.intimidation = modificator(charisma)#запугивание
         self.performance = modificator(charisma)#выступление
 
-"""Создаём исключение"""
+"""
+Создаём исключение
+"""
 class DemoException(Exception):
     def __init__(self, exept):
         super().__init__(exept)
 exept = "Exception Triggered! Something went wrong."
 
-"""Функция, триггерит исключение, когда характеристика больше 30"""
+"""
+Функция, триггерит исключение, когда характеристика больше 30
+"""
 def triggerException(num):
     if (num > 30):
         raise DemoException(exept)
     else:
-        pass
+        return num
 
-"""Функция, триггерит исключение, когда характеристика меньше 0"""
+"""
+Функция, триггерит исключение, когда характеристика меньше 0
+"""
 def triggerZero(num):
     if (num < 0):
         raise DemoException(exept)
     else:
-        pass
+        return num
 
 """Задаём начальные переменные"""
 mycharacter = character("Null", "Null", "Null", 0, 0, 0, 0, 0, 0)#объявление характеристик персонажа
@@ -101,13 +111,18 @@ statuscharisma = False#статус ввода персонажа: Харизм�
 flagrace = False#Проверка на то была ли введена раса
 flagclass = False#Проверка на то был ли введён класс
 
-"""Команда start"""
+"""
+Команда start
+"""
 @bot.message_handler(commands=['start']) #создаем команду
 def start(message):
-    """Объявляем inline кнопки"""
-    global flagrace, flagclass
+    """
+    Объявляем inline кнопки для рас
+    """
+    global flagrace, flagclass, charactercreated
     flagclass = False
     flagrace = False
+    charactercreated = False
     markup = types.InlineKeyboardMarkup(row_width = 1)
     gnome = types.InlineKeyboardButton("Гном", callback_data = 'gnome')
     ork = types.InlineKeyboardButton("Орк", callback_data='ork')
@@ -116,7 +131,9 @@ def start(message):
     markup.add(gnome, ork, human, elf)
     bot.send_message(message.chat.id, "*Здравствуй игрок, добро пожаловать в прекрасный и опасный мир игры Dungeons & Dragons.* \n Для того чтобы начать своё приключение, вам предстоит создать персонажа. Перед тем как начинать создание персонажа, рекомендуем прочесть краткий экскурс по команде /raceinfo или /classinfo, для более подробной информации рекомендуем прочесть Книгу Игрока:https://www.dungeonsanddragons.ru/bookfull/5ed/5e%20Players%20Handbook%20-%20Книга%20игрока%20RUS.pdf, или сайт:https://dnd.su/ \nЧтобы начать создание персонажа выберите расу.".format(message.from_user), reply_markup=markup, parse_mode='Markdown')
 
-    """Объявляем inline кнопки"""
+    """
+    Объявляем inline кнопки, и реакцию на их нажатие
+    """
     @bot.callback_query_handler(func=lambda call: True)
     def callback(call):
         global mycharacter
@@ -187,7 +204,9 @@ def start(message):
                 else:
                     bot.send_message(call.message.chat.id, "Ошибка, вы уже выбрали расу, нажмите /start чтобы начать создание персоажа заново")
 
-            """Вводим классы"""
+            """
+            Вводим классы
+            """
             if call.data == 'bard':
                 global klas, flagclass
                 if flagclass == False:
@@ -240,30 +259,46 @@ def start(message):
                 statuscharisma = False
 
 
-    """Команда /help, выводит список комад"""
+    """
+    Команда /help, выводит список комад
+    """
     @bot.message_handler(commands=['help'])
     def mesanger(message):
         bot.send_message(message.chat.id, "Список команд \n/start - начать создание персонажа(начать заново) \n/raceinfo - узнать информацио о расах \n/classinfo - узнать информацию о классах \n/characteristics - узнать характеристики персонажа \n/skills - узнать навыки персонажа")
 
-    """Команда /raceinfo, выводит информацию о расах"""
+    """
+    Команда /raceinfo, выводит информацию о расах
+    """
     @bot.message_handler(commands=['raceinfo'])
     def raceinfo(message):
         bot.send_message(message.chat.id, "Информация о расах: \n*Гномы* - Нескончаемый гул трудолюбия слышен там, где селятся сплочённые общества гномов. Гномы восторгаются жизнью, каждый миг наслаждаясь новым изобретением, открытием, исследованием, созиданием или шалостью. Значение интеллекта при создании увеличивается на 2 \n*Орки* - Дикие и бесстрашные племена орков всегда находятся в поисках эльфов, дварфов и людей, чтобы уничтожить их. Мотив их ненависти к цивилизованным расам мира и необходимость утоления требований богов продиктован верой, что, если орки будут хорошо сражаться и принесут славу своему племени. Значение силы при создании увеличивается на 2, значение телосложения увеличивается на 1\n*Люди* - В большинстве миров люди — это самая молодая из распространённых рас. Они поздно вышли на мировую сцену и живут намного меньше, чем дварфы, эльфы и драконы. Возможно, именно краткость их жизней заставляет их стремиться достигнуть как можно большего в отведённый им срок. Значение всех характеристик при создании увеличивается на 1\n*Эльфы* - это волшебный народ, обладающий неземным изяществом, живущий в мире, но не являющийся его частью. значение ловкости увеличивается на 2".format(message.from_user), parse_mode='Markdown')
 
-    """Команда /classinfo, выводит информацию о классах(пока не работает)"""
+    """
+    Команда /classinfo, выводит информацию о классах(пока не работает)
+    """
     @bot.message_handler(commands=['classinfo'])
     def classinfo(message):
         bot.send_message(message.chat.id, "Информация о классах")
 
-    """Команда /characteristics, выводит характеристики персонажа"""
+    """
+    Команда /characteristics, выводит характеристики персонажа
+    """
     @bot.message_handler(commands=['characteristics'])
-    def classinfo(message):
-        bot.send_message(message.chat.id, "Характеристики:" + "\nРаса - " + mycharacter.race + "\nКласс - " + mycharacter.klass + "\nСила - " + str(mycharacter.strength) + "\nЛовкость - " + str(mycharacter.dexterety) + "\nТелосложение - " + str(mycharacter.constitution) + "\nИнтеллект - " + str(mycharacter.intellegence) + "\nМудрость - " + str(mycharacter.wisdom) + "\nХаризма - " + str(mycharacter.charisma))
+    def characteristics(message):
+        if(charactercreated == True):
+            bot.send_message(message.chat.id, "Характеристики:" + "\nРаса - " + mycharacter.race + "\nКласс - " + mycharacter.klass + "\nСила - " + str(mycharacter.strength) + "\nЛовкость - " + str(mycharacter.dexterety) + "\nТелосложение - " + str(mycharacter.constitution) + "\nИнтеллект - " + str(mycharacter.intellegence) + "\nМудрость - " + str(mycharacter.wisdom) + "\nХаризма - " + str(mycharacter.charisma))
+        else:
+            bot.send_message(message.chat.id, "вы ещё не создали персонажа")
 
-    """Команда /skills, выводит навыки персонажа"""
+    """
+    Команда /skills, выводит навыки персонажа
+    """
     @bot.message_handler(commands=['skills'])
-    def classinfo(message):
-        bot.send_message(message.chat.id, "Навыки:"  + "\nАнализ - " + str(mycharacter.arcana) + "\nАкробатика - " + str(mycharacter.acrbatics) + "\nАтлетика - " + str(mycharacter.athletics) + "\nИстория - " + str(mycharacter.history) + "\nМагия - " + str(mycharacter.investigation) + "\nПрирода - " + str(mycharacter.nature) + "\nРелигия - " + str(mycharacter.religion) + "\nОбращение с животными - " + str(mycharacter.animal) + "\nПронициательность - " + str(mycharacter.insight) + "\nМедецина - " + str(mycharacter.medicine) + "\nВосприятие - " + str(mycharacter.perception) + "\nУбеждение - " + str(mycharacter.persuasion) + "\nВыживание - " + str(mycharacter.survival) + "\nСкрытность - " + str(mycharacter.stealth) + "\nЛовкость рук - " + str(mycharacter.sleigh) + "\nОбман - " + str(mycharacter.deception) + "\nЗапугивание - " + str(mycharacter.intimidation) + "\nВыступление - " + str(mycharacter.performance))
+    def characteristics(message):
+        if (charactercreated == True):
+            bot.send_message(message.chat.id, "Навыки:"  + "\nАнализ - " + str(mycharacter.arcana) + "\nАкробатика - " + str(mycharacter.acrbatics) + "\nАтлетика - " + str(mycharacter.athletics) + "\nИстория - " + str(mycharacter.history) + "\nМагия - " + str(mycharacter.investigation) + "\nПрирода - " + str(mycharacter.nature) + "\nРелигия - " + str(mycharacter.religion) + "\nОбращение с животными - " + str(mycharacter.animal) + "\nПронициательность - " + str(mycharacter.insight) + "\nМедецина - " + str(mycharacter.medicine) + "\nВосприятие - " + str(mycharacter.perception) + "\nУбеждение - " + str(mycharacter.persuasion) + "\nВыживание - " + str(mycharacter.survival) + "\nСкрытность - " + str(mycharacter.stealth) + "\nЛовкость рук - " + str(mycharacter.sleigh) + "\nОбман - " + str(mycharacter.deception) + "\nЗапугивание - " + str(mycharacter.intimidation) + "\nВыступление - " + str(mycharacter.performance))
+        else:
+            bot.send_message(message.chat.id, "вы ещё не создали персонажа")
 
     """
     Принимает текстовые сообщения
@@ -397,9 +432,11 @@ def start(message):
             except DemoException:
                 bot.send_message(message.chat.id, "Значение характеристики не может превышать 30 и не может быть меньше 0, введите заново")
             else:
+                global charactercreated
                 bot.send_message(message.chat.id, "Значение харизмы = " + str(mycharacter.charisma))
                 bot.send_message(message.chat.id, "Вы успешно создали персонажа, чтобы посмотреть характеристики введите команду /characteristics \nЧтобы посмотреть навыки введите команду /skills")
                 statuscharisma = False
+                charactercreated = True
                 """
                 Конец создания персонажа
                 """
