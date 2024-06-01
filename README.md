@@ -1,1 +1,1 @@
-*DnD Bot*
+#D&D bot
